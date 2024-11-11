@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
+  password String
+}
+
+model Zap {
+  id      String   @id @default(uuid())
+  name    String
+  zapRun  ZapRun[]
+  trigger Trigger?
+  action  Action[]
+}
+
+model AvailableTriggers {
+  id      String    @id @default(uuid())
+  type    String    @unique
+  trigger Trigger[]
+  image   String
+}
+
+model Trigger {
+  id        String            @id @default(uuid())
+  metadata  Json
+  triggerId String            @unique
+  zapId     String            @unique
+  zap       Zap               @relation(fields: [zapId], references: [id])
+  trigger   AvailableTriggers @relation(fields: [triggerId], references: [id])
+}
+
+model Action {
+  id           String           @id @default(uuid())
+  actionId     String           @unique
+  zapId        String
+  zap          Zap              @relation(fields: [zapId], references: [id])
+  action       AvailableActions @relation(fields: [actionId], references: [id])
+  sortingOrder Int              @default(0)
+  metadata     Json
+}
+
+model AvailableActions {
+  id     String   @id @default(uuid())
+  type   String   @unique
+  action Action[]
+  image  String
+}
+
+model ZapRun {
+  id           String        @id @default(uuid())
+  zapId        String        @unique
+  zap          Zap           @relation(fields: [zapId], references: [id])
+  zapRunOutbox ZapRunOutbox?
+  metadata     Json
+}
+
+model ZapRunOutbox {
+  id       String @id @default(uuid())
+  zapRunId String @unique
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
+}
