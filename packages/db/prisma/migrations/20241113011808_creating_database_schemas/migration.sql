@@ -1,8 +1,18 @@
 -- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Zap" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "metadata" JSONB NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Zap_pkey" PRIMARY KEY ("id")
 );
@@ -11,6 +21,7 @@ CREATE TABLE "Zap" (
 CREATE TABLE "AvailableTriggers" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
 
     CONSTRAINT "AvailableTriggers_pkey" PRIMARY KEY ("id")
 );
@@ -18,6 +29,7 @@ CREATE TABLE "AvailableTriggers" (
 -- CreateTable
 CREATE TABLE "Trigger" (
     "id" TEXT NOT NULL,
+    "metadata" JSONB NOT NULL,
     "triggerId" TEXT NOT NULL,
     "zapId" TEXT NOT NULL,
 
@@ -29,6 +41,8 @@ CREATE TABLE "Action" (
     "id" TEXT NOT NULL,
     "actionId" TEXT NOT NULL,
     "zapId" TEXT NOT NULL,
+    "sortingOrder" INTEGER NOT NULL DEFAULT 0,
+    "metadata" JSONB NOT NULL,
 
     CONSTRAINT "Action_pkey" PRIMARY KEY ("id")
 );
@@ -37,6 +51,7 @@ CREATE TABLE "Action" (
 CREATE TABLE "AvailableActions" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
 
     CONSTRAINT "AvailableActions_pkey" PRIMARY KEY ("id")
 );
@@ -45,6 +60,7 @@ CREATE TABLE "AvailableActions" (
 CREATE TABLE "ZapRun" (
     "id" TEXT NOT NULL,
     "zapId" TEXT NOT NULL,
+    "metadata" JSONB NOT NULL,
 
     CONSTRAINT "ZapRun_pkey" PRIMARY KEY ("id")
 );
@@ -77,6 +93,9 @@ CREATE UNIQUE INDEX "ZapRun_zapId_key" ON "ZapRun"("zapId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ZapRunOutbox_zapRunId_key" ON "ZapRunOutbox"("zapRunId");
+
+-- AddForeignKey
+ALTER TABLE "Zap" ADD CONSTRAINT "Zap_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Trigger" ADD CONSTRAINT "Trigger_zapId_fkey" FOREIGN KEY ("zapId") REFERENCES "Zap"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

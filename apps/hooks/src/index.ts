@@ -8,7 +8,7 @@ app.post("/hooks/:userId/:zapId", async (req: Request, res: Response) => {
 
     // Verify user using userId
 
-    await client.$transaction(async tx => {
+    await client.$transaction(async (tx: any) => {
         const newZapRun = await tx.zapRun.create({
             data: {
                 zapId: zapId as string,

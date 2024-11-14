@@ -16,16 +16,20 @@ datasource db {
 model User {
   id       Int    @id @default(autoincrement())
   name     String
-  email    String
+  email    String @unique
   password String
+  zaps     Zap[]
 }
 
 model Zap {
-  id      String   @id @default(uuid())
-  name    String
-  zapRun  ZapRun[]
-  trigger Trigger?
-  action  Action[]
+  id        String   @id @default(uuid())
+  name      String   @default("Untitled")
+  userId    Int
+  zapRun    ZapRun[]
+  triggerId String
+  trigger   Trigger?
+  action    Action[]
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model AvailableTriggers {
@@ -37,7 +41,7 @@ model AvailableTriggers {
 
 model Trigger {
   id        String            @id @default(uuid())
-  metadata  Json
+  metadata  Json?
   triggerId String            @unique
   zapId     String            @unique
   zap       Zap               @relation(fields: [zapId], references: [id])
@@ -51,7 +55,7 @@ model Action {
   zap          Zap              @relation(fields: [zapId], references: [id])
   action       AvailableActions @relation(fields: [actionId], references: [id])
   sortingOrder Int              @default(0)
-  metadata     Json
+  metadata     Json?
 }
 
 model AvailableActions {
