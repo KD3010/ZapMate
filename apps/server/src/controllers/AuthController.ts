@@ -5,7 +5,6 @@ import client from "@repo/db";
 import { sendEmail } from "@repo/email";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { JWT_SECRET } from "../config";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
     const body = req.body;
@@ -89,7 +88,7 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
 
     const token = jwt.sign({
         id: user?.id
-    }, JWT_SECRET);
+    }, process.env.JWT_SECRET as string);
 
     return res.status(200).json({
         message: "Signin successful",

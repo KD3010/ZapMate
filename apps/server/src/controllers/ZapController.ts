@@ -55,8 +55,7 @@ export const createZap = async (req: Request, res: Response): Promise<any> => {
         data: {
             zapId
         }
-    })
-
+    });
 }
 
 export const fetchZapList = async (req: Request, res: Response): Promise<any> => {
