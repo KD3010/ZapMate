@@ -2,8 +2,9 @@ import nodemailer from "nodemailer";
 import fs from "fs";
 import handlebars from "handlebars";
 import _ from "lodash";
-require("dotenv").config();
+import dotenv from "dotenv";
 
+dotenv.config({path: __dirname + "/../.env"});
 const transporter = nodemailer.createTransport({
     service: "gmail",
     host: process.env.SMTP_HOST,

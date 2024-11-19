@@ -4,6 +4,6 @@ import { fetchAvailableTriggers } from "../controllers/TriggerController";
 
 const router = Router();
 
-router.get("/trigger", authMiddleware, fetchAvailableTriggers);
+router.get("/", authMiddleware, fetchAvailableTriggers);
 
 export const TriggerRouter = router;
