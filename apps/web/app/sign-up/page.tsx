@@ -1,10 +1,13 @@
 import React from 'react'
 import { SignupForm } from '@/components/AuthForm'
+import Link from 'next/link'
 
 const page = () => {
   return (
-    <div className='flex w-full h-full'>
-        <div className='flex flex-col justify-center basis-1/2 pl-60 pr-10'>
+    <div className='flex flex-col gap-5 md:flex-row w-full h-full overflow-x-hidden'>
+      <h1 className='p-4 absolute text-2xl font-bold translate-y-[-4px] hover:text-primary-500 transition-all'><Link href={"/"}>ZapMate</Link></h1>
+
+        <div className='flex flex-col justify-center basis-1/2 px-5 md:pl-20 lg:pl-60'>
             <h2 className='font-bold text-[32px] mb-10'>Join millions worldwide who automate their work using ZapMate.</h2>
             <ul className='flex flex-col gap-6'>
                 <li className='flex gap-1'>
@@ -27,7 +30,7 @@ const page = () => {
                 </li>
             </ul>
         </div>
-        <div className='flex flex-col justify-center basis-1/2 pr-60 pl-10'>
+        <div className='flex flex-col justify-center basis-1/2 px-5'>
             <SignupForm />
         </div>
     </div>

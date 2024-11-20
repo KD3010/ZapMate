@@ -93,6 +93,8 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
     return res.status(200).json({
         message: "Signin successful",
         data: {
+            id: user?.id,
+            name: user?.name,
             email: user?.email,
             token,
         }
