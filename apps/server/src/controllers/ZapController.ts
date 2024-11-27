@@ -35,6 +35,7 @@ export const createZap = async (req: Request, res: Response): Promise<any> => {
             data: {
                 triggerId: validation?.data?.availableTriggerId,
                 zapId: zap.id,
+                metadata: validation?.data?.triggerMetaData
             }
         });
 

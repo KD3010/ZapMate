@@ -6,8 +6,6 @@ export const fetchAvailableTriggers = async (req: Request, res: Response): Promi
 
     return res.status(200).json({
         message: "Fetched available triggers",
-        data: {
-            avialableTriggers
-        }
+        avialableTriggers
     })
 }

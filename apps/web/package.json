@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@repo/typescript-config": "*",
+    "@repo/types": "*",
     "axios": "^1.7.7",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",

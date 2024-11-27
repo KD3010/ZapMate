@@ -28,6 +28,22 @@ const CreateZapSchema = z.object({
 
 type TCreateZap = z.infer<typeof CreateZapSchema>
 
+const SelectedTriggerSchema = z.object({
+    availableTriggerId: z.string(),
+    triggerMetaData: z.any().optional(),
+})
+
+type TSelectedTrigger = z.infer<typeof SelectedTriggerSchema>
+
+const SelectedActionSchema = z.object({  
+    actions: z.object({
+        availableActionId: z.string(),
+        actionMetaData: z.any().optional()
+    })
+});
+
+type TSelectedAction = z.infer<typeof SelectedActionSchema>
+
 export {
     SignupSchema,
     SigninSchema,
@@ -40,4 +56,6 @@ export type {
      TSignin,
 
      TCreateZap,
+     TSelectedTrigger,
+     TSelectedAction
 }

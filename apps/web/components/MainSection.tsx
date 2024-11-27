@@ -11,7 +11,7 @@ function MainSection({children}: {
   return (
     <div className="w-full h-full overflow-x-hidden z-10" onClick={() => dropdownVisible && setDropdownVisible(false)}>
       <Navbar dropdownVisible={dropdownVisible} setDropdownVisible={setDropdownVisible} session={session.token as string} />
-      {children}
+      <div className='mt-14'>{children}</div>
     </div>
   )
 }

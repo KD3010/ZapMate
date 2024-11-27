@@ -6,8 +6,6 @@ export const fetchAvailableActions = async (req: Request, res: Response):Promise
 
     return res.status(200).json({
         message: "Fetched available actions",
-        data: {
-            availableActions
-        }
+        availableActions
     })
 }

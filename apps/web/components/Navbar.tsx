@@ -16,7 +16,7 @@ const Navbar = ({dropdownVisible, setDropdownVisible, session}: {
     if(["/login", "/signup"].includes(pathname)) return <></>
 
   return (
-    <nav className='w-full px-10 h-14 border-b border-gray-300 flex items-center justify-between transition-all overflow-y-visible'>
+    <nav className='fixed bg-base-100 w-full px-10 h-14 border-b border-gray-300 flex items-center justify-between transition-all overflow-y-visible'>
         <Link href={session ? "/dashboard" : "/"} className='text-primary-500 font-bold text-2xl'>Zap<span className='text-black font-bold'>Mate</span></Link>
         {session ? 
             <div className={clsx(`flex flex-col items-end gap-2`, {
