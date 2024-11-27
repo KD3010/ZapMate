@@ -78,6 +78,13 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
             email: validation?.data?.email
         }
     })
+    
+    if(!user) {
+        return res.status(422).json({
+            message: "User does not exist",
+            error: "User does not exist"
+        })
+    }
 
     if(user && !bcrypt.compareSync(validation?.data?.password, user?.password)) {
         return res.status(422).json({

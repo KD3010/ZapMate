@@ -3,7 +3,6 @@ import Image from "next/image";
 import HeroImage from "@/public/homepage-hero.avif"
 
 export default function Home() {
-
   return (
     <MainSection>
       <div className="flex lg:flex-row flex-col lg:gap-10 gap-5 mt-20 lg:px-48 px-10 overflow-hidden">
