@@ -103,7 +103,6 @@ function page() {
                     {data.total > 0 && (data?.zaps?.map((zap: TZap) => {
                         const url = `http://localhost:8000/hooks/2/${zap.id}`;
                         
-                        console.log(formatDateTimeToCustomString(zap?.createdDate), zap?.createdDate)
                         return (<tr key={zap.id}>
                             <td className='font-normal py-3 border-b border-gray-200 text-start'>{zap.name}</td>
                             <td className='font-normal py-3 border-b border-gray-200 text-start'>

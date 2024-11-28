@@ -4,59 +4,66 @@ import { formatZodError } from "../helper";
 import client from "@repo/db";
 
 export const createZap = async (req: Request, res: Response): Promise<any> => {
-    const body = req.body;
-    const validation = CreateZapSchema.safeParse(body);
-    // @ts-ignore
-    const id: string = req.id;
+    try {
+        const body = req.body;
+        console.log(body)
+        const validation = CreateZapSchema.safeParse(body);
+        // @ts-ignore
+        const id: string = req.id;
 
-    if(validation.error) { 
-        return res.status(411).json({
-            message: "Incorrect inputs",
-            error: formatZodError(validation.error)
+        if(validation.error) { 
+            return res.status(411).json({
+                message: "Incorrect inputs",
+                error: formatZodError(validation.error)
+            })
+        }
+
+        const zapId = await client.$transaction(async tx => {
+            const zap = await tx.zap.create({
+                data: {
+                    userId: parseInt(id),
+                    triggerId: "",
+                    action: {
+                        create: validation?.data?.actions.map((x, index) => ({
+                            actionId: x.availableActionId as string,
+                            sortingOrder: index + 1,
+                        }))
+                    }
+                }
+            });
+
+            const trigger = await tx.trigger.create({
+                data: {
+                    triggerId: validation?.data?.availableTriggerId,
+                    zapId: zap.id,
+                }
+            });
+
+            await tx.zap.update({
+                where: {
+                    id: zap.id
+                },
+                data: {
+                    triggerId: trigger.id
+                }
+            });
+
+            return zap.id;
+        })
+
+        return res.status(201).json({
+            message: "Zap created successfully",
+            data: {
+                zapId
+            }
+        });
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({
+            message: "Failed to create a zap!",
+            error: error
         })
     }
-
-    const zapId = await client.$transaction(async tx => {
-        const zap = await tx.zap.create({
-            data: {
-                userId: parseInt(id),
-                triggerId: "",
-                action: {
-                    create: validation?.data?.actions.map((x, index) => ({
-                        actionId: x.availableActionId,
-                        sortingOrder: index,
-                        metadata: x.actionMetaData
-                    }))
-                }
-            }
-        });
-
-        const trigger = await tx.trigger.create({
-            data: {
-                triggerId: validation?.data?.availableTriggerId,
-                zapId: zap.id,
-                metadata: validation?.data?.triggerMetaData
-            }
-        });
-
-        await tx.zap.update({
-            where: {
-                id: zap.id
-            },
-            data: {
-                triggerId: trigger.id
-            }
-        });
-
-        return zap.id;
-    })
-
-    return res.status(201).json({
-        message: "Zap created successfully",
-        data: {
-            zapId
-        }
-    });
 }
 
 export const fetchZapList = async (req: Request, res: Response): Promise<any> => {
@@ -67,8 +74,16 @@ export const fetchZapList = async (req: Request, res: Response): Promise<any> =>
             userId: id,
         },
         include: {
-            action: true,
-            trigger: true,
+            action: {
+                include: {
+                    actions: true
+                }
+            },
+            trigger: {
+                include: {
+                    trigger: true
+                }
+            },
         }
     })
 
