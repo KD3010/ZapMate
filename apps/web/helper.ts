@@ -15,10 +15,17 @@ export function formatDateTimeToCustomString(dateTime: string | Date): string {
 }
 
 export const getSessionDetails = () => {
-    const session = {
-        token: localStorage.getItem("token"),
-        user: localStorage.getItem("user"),
+    let session = {
+        token: "",
+        user: {}
+    };
+    if(localStorage.getItem("user") !== null && localStorage.getItem("token") !== null) {
+        session = {
+            token: localStorage.getItem("token") as string,
+            user: JSON.parse(localStorage.getItem("user") as string),
+        }
     }
+  
 
     return session;
 }

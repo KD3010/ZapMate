@@ -26,15 +26,12 @@ export const SignupForm = () => {
             email: data?.signup_email,
             password: data?.signup_pw
         })
-        .then((res) => {
-            toast.success(res.data.message)
+        .then((_) => {
             setTimeout(() => {
                 router.push("/login")
             }, 1000)
         }).catch(error => {
             toast.error(error.response.data.message)
-        }).finally(() => {
-            setLoading(false);
         })
     }
 
@@ -75,23 +72,21 @@ export const LoginForm = () => {
     const [data, setData] = useState<TLogin>({ login_email: "", login_pw: ""});
     const router = useRouter();
 
-    const signup = async (data: TLogin) => {
+    const signin = async (data: TLogin) => {
         setLoading(true);
         await axios.post("http://localhost:5000/api/auth/signin", {
             email: data?.login_email,
             password: data?.login_pw
         })
         .then((res) => {
-            toast.success(res.data.message);
             localStorage.setItem("token", res?.data?.data?.token)
+            localStorage.setItem("user", JSON.stringify(res?.data?.data))
             setTimeout(() => {
                 router.push("/dashboard")
             }, 1000)
             
         }).catch(error => {
             toast.error(error.response.data.message)
-        }).finally(() => {
-            setLoading(false);
         })
     }
 
@@ -101,7 +96,7 @@ export const LoginForm = () => {
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        signup(data)
+        signin(data)
     }
 
   return (

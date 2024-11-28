@@ -35,32 +35,32 @@ interface TZap {
 function page() {
     const router = useRouter();
     const session = getSessionDetails();
-    if(!session.token) router.push("/")
+    if(!session) {
+        router.push("/");
+        return;
+    }
 
     const [loading, setLoading] = useState<boolean>(true);
-    const [linkCopied, setLinkCopied] = useState<boolean>(false);
+    const [selectedRow, setSelectedRow] = useState<Number>(-1);
+    const [renameEnabled, setRenameEnabled] = useState<Number>(-1);
     const [data, setData] = useState<{zaps: TZap[] | [], total: number}>({zaps: [], total: 0})
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(`http://localhost:5000/api/zaps`, {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    'Cache-Control': 'no-cache',
-                  }
-                })
-
-                setData({zaps: response?.data?.data?.zaps, total: response?.data?.data?.total})
-              } catch (error) {
-                toast.error("Couldn't fetch the data");
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`http://localhost:5000/api/zaps`, {
+              headers: {
+                Authorization: session.token,
+                'Cache-Control': 'no-cache',
               }
-            setLoading(false);
-        }
+            })
 
-        fetchData();
-    }, [])
+            setData({zaps: response?.data?.data?.zaps, total: response?.data?.data?.total})
+          } catch (error) {
+            toast.error("Couldn't fetch the data");
+          }
+        setLoading(false);
+    }
 
     const handleCreateClick = () => {
         router.push("/editor")
@@ -73,8 +73,35 @@ function page() {
         } catch (err) {
             toast.error("Unable to copy to clipboard");
         }
-        setLinkCopied(true);
     }
+
+    const handleRenameBlur = async (e: any, zap: TZap) => {
+        setLoading(true);
+        try {
+            await axios.patch(`http://localhost:5000/api/zaps/${zap.id}/rename`, { name: e.target.value }, {headers: {Authorization: session.token}});
+            toast.success("Zap renamed successfully!")
+            fetchData();
+        } catch (error) {
+            toast.error("Could not update the zap, please try again.")
+        }
+        setRenameEnabled(-1);
+        setLoading(false);
+    }
+
+    const handleZapDelete = async (zap: TZap) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/zaps/${zap.id}`, {headers: { Authorization: session.token }});
+            toast.success(`Zap deleted successfully`);
+            fetchData();
+        } catch (error) {
+            toast.error("Could not delete the zap!")
+        }
+    }
+
+    
+    useEffect(() => {
+        fetchData();
+    }, [])
 
   return (
     <MainSection>
@@ -88,7 +115,7 @@ function page() {
                     <span className='mx-2 my-1'>Create</span>
                 </Button>
             </div>
-            {loading ? <div className='mt-20 w-full text-center'><Spinner color='primary' /></div> : (
+
                 <table>
                 <thead>
                     <tr>
@@ -100,42 +127,57 @@ function page() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.total > 0 && (data?.zaps?.map((zap: TZap) => {
-                        const url = `http://localhost:8000/hooks/2/${zap.id}`;
+                    {data.total > 0 && (data?.zaps?.map((zap: TZap, index) => {
+                        // @ts-ignore
+                        const url = `http://localhost:8000/hooks/${session?.user?.id}/${zap.id}`;
                         
                         return (<tr key={zap.id}>
-                            <td className='font-normal py-3 border-b border-gray-200 text-start'>{zap.name}</td>
                             <td className='font-normal py-3 border-b border-gray-200 text-start'>
-                                {linkCopied ? 
-                                    (<div className='flex gap-10'>{url} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#695BE8" className="size-6">
-                                        <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0 1 21 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 0 1 7.5 16.125V3.375Z" />
-                                        <path d="M15 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 17.25 7.5h-1.875A.375.375 0 0 1 15 7.125V5.25ZM4.875 6H6v10.125A3.375 3.375 0 0 0 9.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V7.875C3 6.839 3.84 6 4.875 6Z" />
-                                    </svg></div>)
-                                : 
-                                    (<div className='flex gap-10'>{url} 
-                                        <svg onClick={() => handleUrlCopy(url)} xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" strokeWidth={1.5} fill="#FFFFFF" stroke="#695BE8" className="size-6 cursor-pointer">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                                        </svg>
-                                    </div>)
-                                }
+                                {loading ? 
+                                    <Spinner color='primary' />
+                                 :
+                                    index === renameEnabled ? <input autoFocus={renameEnabled === index} onBlur={(e) => handleRenameBlur(e, zap)} type='text' className='rounded-md w-60 px-2 py-1 bg-white' /> : zap.name
+                                 }
+                            </td>
+                            <td className='font-normal py-3 border-b border-gray-200 text-start'>
+                                <div className='flex gap-10'>{url} 
+                                    <svg onClick={() => handleUrlCopy(url)} xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" strokeWidth={1.5} fill="#FFFFFF" stroke="#695BE8" className="size-6 cursor-pointer">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                    </svg>
+                                </div>
                             </td>
                             <td className='font-normal py-3 border-b border-gray-200 text-start'>{formatDateTimeToCustomString(zap.createdDate)}</td>
                             <td className='font-normal py-3 border-b border-gray-200 text-center'>
                                 <label className="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" value="" className="sr-only peer" />
-                                    <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-700"></div>
+                                    <div className="relative z-10 w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-700"></div>
                                 </label>
                             </td>
-                            <td className='font-normal py-3 border-b border-gray-200 text-start w-5 cursor-pointer'>
+                            <td onClick={() => selectedRow === -1 ? setSelectedRow(index) : setSelectedRow(-1)} id={index.toString()} className='font-normal py-3 border-b border-gray-200 text-start w-5 cursor-pointer flex relative'>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
                                     <path fillRule="evenodd" d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clipRule="evenodd" />
                                 </svg>
+                                {(index === selectedRow) && (
+                                <div className='absolute bg-white px-3 py-2 flex flex-col gap-2 right-5 -top-1 border border-gray-300 rounded-md z-[999]'>
+                                    <div onClick={() => setRenameEnabled(index)} className='hover:bg-violet-100 flex items-center gap-1 text-secondary-500 py-1 px-2 rounded-md'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                    </svg>
+                                        Rename
+                                    </div>
+                                    <div onClick={() => handleZapDelete(zap)} className='hover:bg-red-100 flex items-center gap-1 text-red-600 py-1 px-2 rounded-md'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                        Delete
+                                    </div>
+                                </div>
+                                )}
                             </td>
                         </tr>)
                     }))}
                 </tbody>
             </table>
-            )}
         </div>
     </MainSection>
   )

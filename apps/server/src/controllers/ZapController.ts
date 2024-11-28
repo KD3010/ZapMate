@@ -23,7 +23,7 @@ export const createZap = async (req: Request, res: Response): Promise<any> => {
                 data: {
                     userId: parseInt(id),
                     triggerId: "",
-                    action: {
+                    actions: {
                         create: validation?.data?.actions.map((x, index) => ({
                             actionId: x.availableActionId as string,
                             sortingOrder: index + 1,
@@ -74,9 +74,9 @@ export const fetchZapList = async (req: Request, res: Response): Promise<any> =>
             userId: id,
         },
         include: {
-            action: {
+            actions: {
                 include: {
-                    actions: true
+                    action: true
                 }
             },
             trigger: {
@@ -101,18 +101,91 @@ export const fetchZapWithId = async (req: Request, res: Response): Promise<any> 
     const id = req.id;
     const zap = await client.zap.findFirst({
         where: {
-            user: id
+            user: id,
+            id: req.params.zapId
         },
         include: {
-            action: true,
-            trigger: true
+            actions: {
+                include: {
+                    action: true
+                }
+            },
+            trigger: {
+                include: {
+                    trigger: true
+                }
+            }
         }
     });
 
     return res.status(200).json({
         message: "Zap fetched successfully",
-        data: {
-            zap
-        }
+        zap
     })
+}
+
+export const deleteZapWithId = async (req: Request, res: Response): Promise<any> => {
+    try {
+        // @ts-ignore
+        const id = req.id;
+        const zap = await client.$transaction(async tx => {
+            await tx.trigger.delete({
+                where: {
+                    zapId: req.params.zapId
+                }
+            })
+
+            await tx.action.deleteMany({
+                where: {
+                    zapId: req.params.zapId
+                }
+            })
+
+            return await tx.zap.delete({
+                where: {
+                    id: req.params.zapId,
+                    userId: id
+                }
+            })
+        })
+
+        return res.status(202).json({
+            message: "Zap deleted successfully",
+            deletedZap: zap
+        })
+    } catch(error: any) {
+        console.log(error)
+        res.status(401).json({
+            message: "Could not delete the zap, Please try again",
+            error: error.response
+        })
+    }
+}
+
+export const updateZapWithId = async (req: Request, res: Response): Promise<any> => {
+    try {
+        // @ts-ignore
+        const id = req.id;
+        const body = req.body;
+
+        const zap = await client.zap.update({
+            where: {
+                userId: id,
+                id: req.params.zapId
+            }, 
+            data: {
+                name: body.name
+            }
+        })
+
+        return res.status(201).json({
+            message: "Zap updated successfully",
+            updatedZap: zap
+        })
+    } catch(error: any) {
+        res.status(401).json({
+            message: "Could not update the zap, please try again",
+            error: error.response
+        })
+    }
 }

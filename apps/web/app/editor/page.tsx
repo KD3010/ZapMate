@@ -3,7 +3,6 @@ import PublishZap from '@/components/PublishZap';
 import React from 'react'
 
 function page() {
-  
   return (
     <MainSection>
       <div className='min-h-[92vh] canvas w-full flex flex-col items-center py-8'>

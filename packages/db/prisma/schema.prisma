@@ -28,7 +28,7 @@ model Zap {
   zapRun      ZapRun[]
   triggerId   String
   trigger     Trigger?
-  action      Action[]
+  actions     Action[]
   user        User     @relation(fields: [userId], references: [id])
   createdDate DateTime @default(now())
 }
@@ -54,7 +54,7 @@ model Action {
   actionId     String
   zapId        String
   zap          Zap              @relation(fields: [zapId], references: [id])
-  actions      AvailableActions @relation(fields: [actionId], references: [id])
+  action       AvailableActions @relation(fields: [actionId], references: [id])
   sortingOrder Int              @default(0)
   metadata     Json             @default("{}")
 }
