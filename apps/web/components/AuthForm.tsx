@@ -29,9 +29,10 @@ export const SignupForm = () => {
         .then((_) => {
             setTimeout(() => {
                 router.push("/login")
-            }, 1000)
+            }, 500)
         }).catch(error => {
             toast.error(error.response.data.message)
+            setLoading(false);
         })
     }
 
@@ -83,10 +84,11 @@ export const LoginForm = () => {
             localStorage.setItem("user", JSON.stringify(res?.data?.data))
             setTimeout(() => {
                 router.push("/dashboard")
-            }, 1000)
+            }, 500)
             
         }).catch(error => {
             toast.error(error.response.data.message)
+            setLoading(false);
         })
     }
 

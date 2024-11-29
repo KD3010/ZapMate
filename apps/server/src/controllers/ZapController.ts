@@ -6,7 +6,6 @@ import client from "@repo/db";
 export const createZap = async (req: Request, res: Response): Promise<any> => {
     try {
         const body = req.body;
-        console.log(body)
         const validation = CreateZapSchema.safeParse(body);
         // @ts-ignore
         const id: string = req.id;
@@ -53,9 +52,8 @@ export const createZap = async (req: Request, res: Response): Promise<any> => {
 
         return res.status(201).json({
             message: "Zap created successfully",
-            data: {
-                zapId
-            }
+            zapId
+            
         });
     } catch (error) {
         console.log(error)
@@ -67,61 +65,75 @@ export const createZap = async (req: Request, res: Response): Promise<any> => {
 }
 
 export const fetchZapList = async (req: Request, res: Response): Promise<any> => {
-    // @ts-ignore
-    const id = req.id;
-    const zaps = await client.zap.findMany({
-        where: {
-            userId: id,
-        },
-        include: {
-            actions: {
-                include: {
-                    action: true
-                }
+    try {
+        // @ts-ignore
+        const id = req.id;
+        const zaps = await client.zap.findMany({
+            where: {
+                userId: id,
             },
-            trigger: {
-                include: {
-                    trigger: true
-                }
-            },
-        }
-    })
+            include: {
+                actions: {
+                    include: {
+                        action: true
+                    }
+                },
+                trigger: {
+                    include: {
+                        trigger: true
+                    }
+                },
+            }
+        })
 
-    return res.status(200).json({
-        message: "Zaps fetched successsfully",
-        data: {
-            zaps,
-            total: zaps.length
-        }
-    })
+        return res.status(200).json({
+            message: "Zaps fetched successsfully",
+            data: {
+                zaps,
+                total: zaps.length
+            }
+        })
+    } catch(error: any) {
+        res.status(500).json({
+            message: "Could not fetch the zaps!",
+            error: error?.response
+        })
+    }
 }
 
 export const fetchZapWithId = async (req: Request, res: Response): Promise<any> => {
-    // @ts-ignore
-    const id = req.id;
-    const zap = await client.zap.findFirst({
-        where: {
-            user: id,
-            id: req.params.zapId
-        },
-        include: {
-            actions: {
-                include: {
-                    action: true
-                }
+    try {
+        // @ts-ignore
+        const id = req.id;
+        const zap = await client.zap.findFirst({
+            where: {
+                user: id,
+                id: req.params.zapId
             },
-            trigger: {
-                include: {
-                    trigger: true
+            include: {
+                actions: {
+                    include: {
+                        action: true
+                    }
+                },
+                trigger: {
+                    include: {
+                        trigger: true
+                    }
                 }
             }
-        }
-    });
+        });
 
-    return res.status(200).json({
-        message: "Zap fetched successfully",
-        zap
-    })
+        return res.status(200).json({
+            message: "Zap fetched successfully",
+            zap
+        })
+    } catch(error: any) {
+        res.status(500).json({
+            message: "Could not fetch the zap",
+            error: error.response
+        })
+    }
 }
 
 export const deleteZapWithId = async (req: Request, res: Response): Promise<any> => {
