@@ -105,9 +105,9 @@ export const fetchZapWithId = async (req: Request, res: Response): Promise<any> 
     try {
         // @ts-ignore
         const id = req.id;
-        const zap = await client.zap.findFirst({
+        const zap = await client.zap.findUnique({
             where: {
-                user: id,
+                userId: id,
                 id: req.params.zapId
             },
             include: {
@@ -131,7 +131,7 @@ export const fetchZapWithId = async (req: Request, res: Response): Promise<any> 
     } catch(error: any) {
         res.status(500).json({
             message: "Could not fetch the zap",
-            error: error.response
+            error: error
         })
     }
 }
@@ -166,7 +166,6 @@ export const deleteZapWithId = async (req: Request, res: Response): Promise<any>
             deletedZap: zap
         })
     } catch(error: any) {
-        console.log(error)
         res.status(401).json({
             message: "Could not delete the zap, Please try again",
             error: error.response

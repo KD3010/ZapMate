@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from './Button';
 import ZapCell from './ZapCell';
 import { TSelectedAction, TSelectedTrigger } from '@repo/types';
@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Spinner from './Spinner';
 import Modal from './Modal';
+import { getSessionDetails } from '@/helper';
+import { headers } from 'next/headers';
 
 const emptyAction = {
     availableActionId: "",
@@ -15,12 +17,36 @@ const emptyAction = {
     actionMetaData: {}
 }
 
-const PublishZap = () => {
+const PublishZap = ({zapId}: {
+    zapId?: String
+}) => {
     const router = useRouter();
     const [loading, setLoading] = useState<boolean>();
     const [selectedTrigger, setSelectedTrigger] = useState<TSelectedTrigger>();
     const [selectedActions, setSelectedActions] = useState<TSelectedAction[]>([emptyAction]);
     const [modalVisibilityFor, setModalVisibilityFor] = useState<"None" | "Triggers" | "Actions">("None");
+
+    useEffect(() => {
+        if(zapId !== "") {
+            const fetchZapDetails = async () => {
+                try {
+                    const zapIdString = JSON.parse(zapId as string)
+                    console.log(zapIdString)
+                    const {data: { zap }} = await axios.get(`http://localhost:5000/api/zaps/${zapIdString}`, {headers: {Authorization: localStorage.getItem("token")}});
+                    setSelectedTrigger({availableTriggerId: zap.trigger.trigger.id, triggerType: zap.trigger.trigger.type});
+                    setSelectedActions(zap.actions.map((a: any) => ({
+                        availableActionId: a.action.id,
+                        actionType: a.action.type
+                    })))
+                } catch(error) {
+                    toast.error("Could not fetch zap details!")
+                    router.push("/dashboard");
+                }
+            }
+
+            fetchZapDetails();
+        }
+    }, [])
 
     const handlePublish  = async () => {
         setLoading(true);

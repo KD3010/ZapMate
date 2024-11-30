@@ -7,12 +7,13 @@ import { toast } from 'react-toastify';
 import Spinner from '@/components/Spinner';
 import { formatDateTimeToCustomString, getSessionDetails } from '../../helper';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface TZap {
     id: string,
     name?: string,
     triggerId: string,
-    action: TAction[]
+    actions: TAction[]
     trigger: TTrigger
     createdDate: Date | string
   }
@@ -21,15 +22,23 @@ interface TZap {
     id: string,
     actionId: string,
     zapId: string,                     
-    sortingOrder: number                      
-    metadata: JSON | null
+    sortingOrder: number,                      
+    metadata: JSON | null,
+    action: {
+        type: string,
+        image: string
+    }
   }
   
   interface TTrigger {
     id: string,
-    metadata: JSON | null
-    triggerId: string
-    zapId: string
+    metadata: JSON | null,
+    triggerId: string,
+    zapId: string,
+    trigger: {
+        type: string,
+        image: string
+    }
   }
 
 function page() {
@@ -118,42 +127,50 @@ function page() {
 
                 <table>
                 <thead>
-                    <tr>
-                        <th className='font-normal py-3 border-b border-gray-200 text-start w-64'>Name</th>
-                        <th className='font-normal py-3 border-b border-gray-200 text-start'>Webhook URL</th>
-                        <th className='font-normal py-3 border-b border-gray-200 text-start w-64'>Created At</th>
-                        <th className='font-normal py-3 border-b border-gray-200 text-center w-20'>Status</th>
-                        <th className='font-normal py-3 border-b border-gray-200 text-start'></th>
+                    <tr className='border-b border-gray-200'>
+                        <th className='font-normal py-3 text-start w-40'>Name</th>
+                        <th className='font-normal py-3 text-start w-40'>Flow</th>
+                        <th className='font-normal py-3 text-start'>Webhook URL</th>
+                        <th className='font-normal py-3 text-start'>Created At</th>
+                        <th className='font-normal py-3 text-center w-20'>Status</th>
+                        <th className='font-normal py-3 text-start'></th>
                     </tr>
                 </thead>
                 <tbody>
                     {data.total > 0 && (data?.zaps?.map((zap: TZap, index) => {
                         // @ts-ignore
                         const url = `http://localhost:8000/hooks/${session?.user?.id}/${zap.id}`;
+                        const parsedData = JSON.stringify(zap.id)
                         
-                        return (<tr key={zap.id}>
-                            <td className='font-normal py-3 border-b border-gray-200 text-start'>
+                        return (<tr key={zap.id} className='border-b border-gray-200'>
+                            <td className='font-normal py-3 text-start'>
                                 {loading ? 
                                     <Spinner color='primary' />
                                  :
-                                    index === renameEnabled ? <input autoFocus={renameEnabled === index} onBlur={(e) => handleRenameBlur(e, zap)} type='text' className='rounded-md w-60 px-2 py-1 bg-white' /> : zap.name
+                                    index === renameEnabled ? <input autoFocus={renameEnabled === index} onBlur={(e) => handleRenameBlur(e, zap)} type='text' className='rounded-md w-60 px-2 py-1 bg-white' /> 
+                                    : <Link className='hover:underline underline-offset-2 text-secondary-700' href={{pathname: "/editor", query: {zapId: parsedData}}}>
+                                        {zap.name}
+                                    </Link>
                                  }
                             </td>
-                            <td className='font-normal py-3 border-b border-gray-200 text-start'>
+                            <td className='font-normal py-3 text-start flex'>
+                                <img className='w-6 border border-gray-500' src={zap.trigger.trigger.image} />{zap.actions.map(a => <img key={a.actionId} className='w-6 border border-gray-500' src={a.action.image} />)}
+                            </td>
+                            <td className='font-normal py-3 text-start'>
                                 <div className='flex gap-10'>{url} 
                                     <svg onClick={() => handleUrlCopy(url)} xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" strokeWidth={1.5} fill="#FFFFFF" stroke="#695BE8" className="size-6 cursor-pointer">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
                                     </svg>
                                 </div>
                             </td>
-                            <td className='font-normal py-3 border-b border-gray-200 text-start'>{formatDateTimeToCustomString(zap.createdDate)}</td>
-                            <td className='font-normal py-3 border-b border-gray-200 text-center'>
+                            <td className='font-normal py-3 text-start'>{formatDateTimeToCustomString(zap.createdDate)}</td>
+                            <td className='font-normal py-3 text-center'>
                                 <label className="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" value="" className="sr-only peer" />
                                     <div className="relative z-10 w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-700"></div>
                                 </label>
                             </td>
-                            <td onClick={() => selectedRow === -1 ? setSelectedRow(index) : setSelectedRow(-1)} id={index.toString()} className='font-normal py-3 border-b border-gray-200 text-start w-5 cursor-pointer flex relative'>
+                            <td onClick={() => selectedRow === -1 ? setSelectedRow(index) : setSelectedRow(-1)} id={index.toString()} className='font-normal py-4 text-start w-5 cursor-pointer flex relative'>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
                                     <path fillRule="evenodd" d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clipRule="evenodd" />
                                 </svg>
