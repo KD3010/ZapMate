@@ -154,7 +154,7 @@ function page() {
                                  }
                             </td>
                             <td className='font-normal py-3 text-start flex'>
-                                <img className='w-6 border border-gray-500' src={zap.trigger.trigger.image} />{zap.actions.map(a => <img key={a.actionId} className='w-6 border border-gray-500' src={a.action.image} />)}
+                                <img className='w-6 border border-gray-500' src={zap.trigger.trigger.image} />{zap.actions.map((a, i) => <img key={i} className='w-6 border border-gray-500' src={a.action.image} />)}
                             </td>
                             <td className='font-normal py-3 text-start'>
                                 <div className='flex gap-10'>{url} 

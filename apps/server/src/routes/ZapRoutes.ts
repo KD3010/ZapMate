@@ -6,6 +6,7 @@ const router = Router();
 
 router.route("/:zapId")
     .get(authMiddleware, ZapController.fetchZapWithId)
+    .put(authMiddleware, ZapController.updateZapWithId)
     .delete(authMiddleware, ZapController.deleteZapWithId)
 router.patch("/:zapId/rename",authMiddleware, ZapController.updateZapWithId )
 router.post("/", authMiddleware, ZapController.createZap)

@@ -3,12 +3,15 @@ import client from "@repo/db";
 const TOPIC_NAME = "zap-events"
 
 async function main() {
+    // Creating consumer and subscribing to the zap-events topic created by transaction processor service
     const consumer = kafka.consumer({ groupId: "worker" });
     await consumer.connect();
 
     await consumer.subscribe({ topic: TOPIC_NAME, fromBeginning: true});
 
     await consumer.run({
+        // AutoCommit fetches the message from kafka and marks directly it to be processed, which we don't want
+        // Only mark zap processed if the entire zap actions have been performed, or else do not remove it from kafka
         autoCommit: false,
         eachMessage: async ({topic, partition, message}) => {
             if(!message.value?.toString()) {
@@ -26,13 +29,13 @@ async function main() {
                 include: {
                     zap: {
                         include: {
-                            action: true
+                            actions: true
                         }
                     }
                 }
             });
 
-            const currentAction = zapRunDetails?.zap.action.find(x => x.sortingOrder === stage);
+            const currentAction = zapRunDetails?.zap.actions.find(x => x.sortingOrder === stage);
 
             if(!currentAction) {
                 console.log("Current Action not found!");

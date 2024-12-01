@@ -177,21 +177,47 @@ export const updateZapWithId = async (req: Request, res: Response): Promise<any>
     try {
         // @ts-ignore
         const id = req.id;
-        const body = req.body;
+        const { name, actions } = req.body;
 
-        const zap = await client.zap.update({
-            where: {
-                userId: id,
-                id: req.params.zapId
-            }, 
-            data: {
-                name: body.name
+        const zap = await client.$transaction(async tx => {
+
+            if(actions.length) {
+                await tx.action.deleteMany({
+                    where: {
+                        zapId: req.params.zapId
+                    }
+                })
+
+                await tx.zap.update({
+                    where: {
+                        userId: id,
+                        id: req.params.zapId
+                    }, 
+                    data: {
+                        actions: {
+                            create: actions.map((x: any, index: number) => ({
+                                actionId: x.availableActionId as string,
+                                sortingOrder: index + 1,
+                            }))
+                        }
+                    }
+                })
+            }
+
+            if(name) {
+                await tx.zap.update({
+                    where: {
+                        id: req.params.zapId
+                    }, 
+                    data: {
+                        name: name
+                    }
+                })
             }
         })
 
         return res.status(201).json({
             message: "Zap updated successfully",
-            updatedZap: zap
         })
     } catch(error: any) {
         res.status(401).json({

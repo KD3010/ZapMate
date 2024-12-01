@@ -24,6 +24,15 @@ export default {
       backgroundImage: {
         "canvas" : "radial-gradient(black 1px, transparent 0)"
       },
+      keyframes: {
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-15deg)' },
+          '50%': { transform: 'rotate(15deg)' },
+        }
+      },
+      animation: {
+        wiggle: 'wiggle 0.3s ease-in-out',
+      }
     },
   },
   plugins: [],
