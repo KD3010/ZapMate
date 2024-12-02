@@ -28,10 +28,20 @@ export default {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-15deg)' },
           '50%': { transform: 'rotate(15deg)' },
+        },
+        zoom_in: {
+          '0%': {transform: 'scale(0)'},
+          "100%": {transform: 'scale(1)'}
+        },
+        slide_in: {
+          "0%": {opacity: '0', transform: "translate3d(-50%, 0%, 0)"},
+          "100%": {opacity: '1', transform: "translate3d(0%, 0%, 0)"}
         }
       },
       animation: {
         wiggle: 'wiggle 0.3s ease-in-out',
+        zoom_in: 'zoom_in 0.3s ease-in-out',
+        slide_in: 'slide_in 0.3s ease-in-out'
       }
     },
   },

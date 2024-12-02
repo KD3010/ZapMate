@@ -8,7 +8,13 @@ async function main() {
 
     while(1) {
         const pendingRows = await client.zapRunOutbox.findMany({
-            where: {},
+            where: {
+                zapRun: {
+                    zap: {
+                        isActive: true
+                    }
+                }
+            },
             take: 10
         });
 

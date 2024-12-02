@@ -118,7 +118,8 @@ const PublishZap = ({zapId}: {
 
   return (
     <>
-    <div className='self-end mr-10'>
+    <div className='w-full fixed flex justify-between px-10 py-2 bg-[#2d2e2e]'>
+        <div/>
         <Button variant='secondary' onClick={handlePublish} >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
@@ -127,11 +128,11 @@ const PublishZap = ({zapId}: {
           {loading && <Spinner color='white' />}
         </Button>
     </div>
-    <div className='mt-20 flex flex-col gap-4'>
-        <ZapCell  index={1} name={selectedTrigger ? selectedTrigger.triggerType : "Trigger"} onClick={() => handleCellClick(1)} />
+    <div className='mt-32 flex flex-col items-center gap-4'>
+        <ZapCell index={1} name={selectedTrigger ? selectedTrigger.triggerType : "Trigger"} onClick={() => handleCellClick(1)} />
         {selectedActions?.map((action, index) => <div key={index}><ZapCell index={index+2} name={action.actionType ? action.actionType : "Action"} onClick={() => handleCellClick(index+2)} handleDelete={handleActionDelete} /></div>)}
     </div>
-    <div className='mt-8'>
+    <div className='mt-8 flex justify-center'>
         <button onClick={() => setSelectedActions([...selectedActions, emptyAction])} className='bg-secondary-500 shadow-md hover:bg-secondary-700 hover:shadow-lg transition-all p-2 rounded-full'>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="size-6">
                 <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />

@@ -8,6 +8,7 @@ import Spinner from '@/components/Spinner';
 import { formatDateTimeToCustomString, getSessionDetails } from '../../helper';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Tooltip from '@/components/Tooltip';
 
 interface TZap {
     id: string,
@@ -16,6 +17,7 @@ interface TZap {
     actions: TAction[]
     trigger: TTrigger
     createdDate: Date | string
+    isActive: boolean
   }
   
   interface TAction {
@@ -87,14 +89,25 @@ function page() {
     const handleRenameBlur = async (e: any, zap: TZap) => {
         setLoading(true);
         try {
-            await axios.patch(`http://localhost:5000/api/zaps/${zap.id}/rename`, { name: e.target.value }, {headers: {Authorization: session.token}});
-            toast.success("Zap renamed successfully!")
-            fetchData();
+            if(e.target.value !== zap.name) {
+                await axios.patch(`http://localhost:5000/api/zaps/${zap.id}/rename`, { name: e.target.value }, {headers: {Authorization: session.token}});
+                toast.success("Zap renamed successfully!")
+                fetchData();
+            }
         } catch (error) {
             toast.error("Could not update the zap, please try again.")
         }
         setRenameEnabled(-1);
         setLoading(false);
+    }
+
+    const toggleZapExecution = async (e: any, zap: TZap) => {
+        try {
+            await axios.patch(`http://localhost:5000/api/zaps/${zap.id}/enable`, { isActive: !!e.target.checked }, {headers: {Authorization: session.token}});
+            fetchData();
+        } catch (error) {
+            toast.error(`Could not ${zap.isActive ? "disable" : "enable"} Zap`)
+        }
     }
 
     const handleZapDelete = async (zap: TZap) => {
@@ -116,7 +129,7 @@ function page() {
     <MainSection>
         <div className='flex flex-col py-4 px-20 gap-6'>
             <div className='flex justify-between items-center'>
-                <h3 className='text-4xl font-semibold '>Zaps</h3>
+                <h3 className='text-3xl font-semibold '>My Zaps</h3>
                 <Button variant='secondary' onClick={handleCreateClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="size-6">
                         <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
@@ -143,18 +156,25 @@ function page() {
                         const parsedData = JSON.stringify(zap.id)
                         
                         return (<tr key={zap.id} className='border-b border-gray-200'>
-                            <td className='font-normal py-3 text-start'>
+                            <td className='font-normal mr-1 py-3 text-start'>
                                 {loading ? 
                                     <Spinner color='primary' />
                                  :
-                                    index === renameEnabled ? <input autoFocus={renameEnabled === index} onBlur={(e) => handleRenameBlur(e, zap)} type='text' className='rounded-md w-60 px-2 py-1 bg-white' /> 
+                                    index === renameEnabled ? <input defaultValue={zap.name} autoFocus={renameEnabled === index} onBlur={(e) => handleRenameBlur(e, zap)} type='text' className='rounded-md w-full max-w-32 px-2 py-1 bg-white' /> 
                                     : <Link className='hover:underline underline-offset-2 text-secondary-700' href={{pathname: "/editor", query: {zapId: parsedData}}}>
                                         {zap.name}
                                     </Link>
                                  }
                             </td>
                             <td className='font-normal py-3 text-start flex'>
-                                <img className='w-6 border border-gray-500' src={zap.trigger.trigger.image} />{zap.actions.map((a, i) => <img key={i} className='w-6 border border-gray-500' src={a.action.image} />)}
+                                <Tooltip tooltipText={zap.trigger.trigger.type}>
+                                    <img className='w-6 border p-[3px] border-gray-500' src={zap.trigger.trigger.image} />
+                                </Tooltip>
+                                {zap.actions.map((a, i) => (<div key={i}>
+                                    <Tooltip tooltipText={a.action.type}>
+                                        <img key={i} className='w-6 p-[3px] border border-gray-500' src={a.action.image} />
+                                    </Tooltip>
+                                </div>))}
                             </td>
                             <td className='font-normal py-3 text-start'>
                                 <div className='flex gap-10'>{url} 
@@ -166,7 +186,7 @@ function page() {
                             <td className='font-normal py-3 text-start'>{formatDateTimeToCustomString(zap.createdDate)}</td>
                             <td className='font-normal py-3 text-center'>
                                 <label className="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" value="" className="sr-only peer" />
+                                    <input type="checkbox" checked={zap.isActive} onChange={(e) => toggleZapExecution(e, zap)} className="sr-only peer" />
                                     <div className="relative z-10 w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-700"></div>
                                 </label>
                             </td>

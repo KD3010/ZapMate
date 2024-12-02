@@ -173,11 +173,69 @@ export const deleteZapWithId = async (req: Request, res: Response): Promise<any>
     }
 }
 
+export const renameZapWithId = async (req: Request, res: Response): Promise<any> => {
+    // @ts-ignore
+    const id = req.id;
+    const { name } = req.body;
+
+    try {
+        const zap = await client.zap.update({
+            where: {
+                userId: id,
+                id: req.params.zapId
+            },
+            data: {
+                name: name
+            }
+        })
+
+        res.status(200).json({
+            message: "Zap renamed successfully!",
+            zap: zap
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Could not rename the zap!",
+            error: error
+        })
+    }
+}
+
+export const enableZapExecution = async (req: Request, res: Response): Promise<any> => {
+    // @ts-ignore
+    const id = req.id;
+    const { isActive } = req.body;
+
+    try {
+        const zap = await client.zap.update({
+            where: {
+                userId: id,
+                id: req.params.zapId
+            },
+            data: {
+                isActive: isActive
+            }
+        })
+
+        res.status(200).json({
+            message: "Zap renamed successfully!",
+            zap: zap
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Could not rename the zap!",
+            error: error
+        })
+    }
+}
+
 export const updateZapWithId = async (req: Request, res: Response): Promise<any> => {
     try {
         // @ts-ignore
         const id = req.id;
-        const { name, actions } = req.body;
+        const { actions } = req.body;
 
         const zap = await client.$transaction(async tx => {
 
@@ -200,17 +258,6 @@ export const updateZapWithId = async (req: Request, res: Response): Promise<any>
                                 sortingOrder: index + 1,
                             }))
                         }
-                    }
-                })
-            }
-
-            if(name) {
-                await tx.zap.update({
-                    where: {
-                        id: req.params.zapId
-                    }, 
-                    data: {
-                        name: name
                     }
                 })
             }

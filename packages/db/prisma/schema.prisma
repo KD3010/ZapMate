@@ -31,6 +31,7 @@ model Zap {
   actions     Action[]
   user        User     @relation(fields: [userId], references: [id])
   createdDate DateTime @default(now())
+  isActive    Boolean  @default(false)
 }
 
 model AvailableTriggers {

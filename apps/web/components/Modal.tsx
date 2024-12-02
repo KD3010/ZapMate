@@ -58,7 +58,7 @@ const Modal = ({isVisible, setIsVisible, onClick}: {
   return (
     <div className={clsx('absolute justify-center items-center bg-modal-bg h-screen w-screen top-0 left-0 flex transition-all')}
     >
-        <div className='bg-white w-[40rem] h-96 rounded-md shadow-lg p-4'>
+        <div className='bg-white w-[40rem] h-96 rounded-md shadow-lg p-4 animate-zoom_in'>
             <div className='flex items-center justify-between pb-2 border-b border-b-gray-300'>
                 <h3 className='font-semibold text-lg'>{`Available ${isVisible}`}</h3>
                 <svg onClick={() => setIsVisible("None")} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000" className="size-6 cursor-pointer">
