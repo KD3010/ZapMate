@@ -22,7 +22,7 @@ const PublishZap = ({zapId}: {
     const [loading, setLoading] = useState<boolean>();
     const [selectedTrigger, setSelectedTrigger] = useState<TSelectedTrigger>();
     const [selectedActions, setSelectedActions] = useState<TSelectedAction[]>([emptyAction]);
-    const [modalVisibilityFor, setModalVisibilityFor] = useState<"None" | "Triggers" | "Actions">("None");
+    const [modalVisibilityFor, setModalVisibilityFor] = useState<number>(0);
 
     useEffect(() => {
         if(zapId !== "") {
@@ -86,29 +86,33 @@ const PublishZap = ({zapId}: {
     }
 
     const handleTriggerOrActionSelection = (selectedItem: any) => {
-        if(modalVisibilityFor === "Triggers") {
+        if(modalVisibilityFor === 1) {
             setSelectedTrigger && setSelectedTrigger({
                 availableTriggerId: selectedItem?.id,
                 triggerType: selectedItem?.type,
                 triggerMetaData: {}
             })
-        } else if(modalVisibilityFor === "Actions") {
-            selectedActions && setSelectedActions && setSelectedActions([...selectedActions.slice(0, selectedActions.length - 1), {
-                availableActionId: selectedItem.id,
-                actionType: selectedItem.type,
-                actionMetaData: {}
-            }])
+        } else if(modalVisibilityFor > 1) {
+            setSelectedActions && setSelectedActions(a => a.map((action, i) => {
+                if(i+2 === modalVisibilityFor) {
+                    action.actionType = selectedItem?.type,
+                    action.availableActionId = selectedItem?.id,
+                    action.actionMetaData = {};
+                }
+
+                return action;
+            }))
         } 
-        setModalVisibilityFor("None");
+        setModalVisibilityFor(0);
     }
 
     const handleCellClick = (index: Number) => {
         if(index === 1) {
-            setModalVisibilityFor("Triggers")
+            setModalVisibilityFor(1)
         } else if(Number(index) > 1) {
-            setModalVisibilityFor("Actions")
+            setModalVisibilityFor(Number(index))
         } else {
-            setModalVisibilityFor("None")
+            setModalVisibilityFor(0)
         }
     }
 
@@ -139,7 +143,7 @@ const PublishZap = ({zapId}: {
             </svg>
         </button>
     </div>
-    {modalVisibilityFor !== "None" && <Modal isVisible={modalVisibilityFor} setIsVisible={setModalVisibilityFor} onClick={handleTriggerOrActionSelection} />}
+    {modalVisibilityFor !== 0 && <Modal isVisible={modalVisibilityFor} setIsVisible={setModalVisibilityFor} onClick={handleTriggerOrActionSelection} />}
     </>
   )
 }
