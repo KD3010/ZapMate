@@ -23,6 +23,7 @@ const PublishZap = ({zapId}: {
     const [selectedTrigger, setSelectedTrigger] = useState<TSelectedTrigger>();
     const [selectedActions, setSelectedActions] = useState<TSelectedAction[]>([emptyAction]);
     const [modalVisibilityFor, setModalVisibilityFor] = useState<number>(0);
+    const [formPage, setFormPage] = useState<number>(1);
 
     useEffect(() => {
         if(zapId !== "") {
@@ -103,7 +104,7 @@ const PublishZap = ({zapId}: {
                 return action;
             }))
         } 
-        setModalVisibilityFor(0);
+        setFormPage(a => a+1);
     }
 
     const handleCellClick = (index: Number) => {
@@ -143,7 +144,7 @@ const PublishZap = ({zapId}: {
             </svg>
         </button>
     </div>
-    {modalVisibilityFor !== 0 && <Modal isVisible={modalVisibilityFor} setIsVisible={setModalVisibilityFor} onClick={handleTriggerOrActionSelection} />}
+    {modalVisibilityFor !== 0 && <Modal page={formPage} isVisible={modalVisibilityFor} setIsVisible={setModalVisibilityFor} onClick={handleTriggerOrActionSelection} />}
     </>
   )
 }
