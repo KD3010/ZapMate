@@ -56,7 +56,7 @@ const PublishZap = ({zapId}: {
             "triggerMetaData": {},
             "actions": selectedActions.map((action) => ({
                 availableActionId: action.availableActionId,
-                actionMetaData: {}
+                actionMetaData: action.actionMetaData
             }))
         }
         
@@ -97,12 +97,12 @@ const PublishZap = ({zapId}: {
                 if(i+2 === modalVisibilityFor) {
                     action.actionType = selectedItem?.type,
                     action.availableActionId = selectedItem?.id,
-                    action.actionMetaData = {};
+                    action.actionMetaData = selectedItem?.metadata;
                 }
-
                 return action;
             }))
         } 
+
         setModalVisibilityFor(0);
     }
 
