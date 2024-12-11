@@ -25,6 +25,7 @@ export const createZap = async (req: Request, res: Response): Promise<any> => {
                     actions: {
                         create: validation?.data?.actions.map((x, index) => ({
                             actionId: x.availableActionId as string,
+                            metadata: x.actionMetaData,
                             sortingOrder: index + 1,
                         }))
                     }
@@ -255,6 +256,7 @@ export const updateZapWithId = async (req: Request, res: Response): Promise<any>
                         actions: {
                             create: actions.map((x: any, index: number) => ({
                                 actionId: x.availableActionId as string,
+                                metadata: x.actionMetaData,
                                 sortingOrder: index + 1,
                             }))
                         }
@@ -265,6 +267,7 @@ export const updateZapWithId = async (req: Request, res: Response): Promise<any>
 
         return res.status(201).json({
             message: "Zap updated successfully",
+            zap
         })
     } catch(error: any) {
         res.status(401).json({
