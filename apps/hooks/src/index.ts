@@ -2,9 +2,10 @@ import express, { Request, Response } from 'express';
 import client from "@repo/db";
 
 const app = express();
+app.use(express.json())
 
 app.post("/hooks/:userId/:zapId", async (req: Request, res: Response) => {
-    const { userId, zapId } = req.params;
+    const { zapId } = req.params;
 
     // Verify user using userId
 
@@ -12,7 +13,7 @@ app.post("/hooks/:userId/:zapId", async (req: Request, res: Response) => {
         const newZapRun = await tx.zapRun.create({
             data: {
                 zapId: zapId as string,
-                metadata: {}
+                metadata: req.body
             }
         })
 
@@ -21,6 +22,10 @@ app.post("/hooks/:userId/:zapId", async (req: Request, res: Response) => {
                 zapRunId: newZapRun.id
             }
         })
+    })
+
+    res.status(201).json({
+        message: "Hook triggered"
     })
 })
 
