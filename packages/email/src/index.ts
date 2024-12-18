@@ -30,4 +30,17 @@ export const sendEmail = async (to: string, subject: string, body: string, user?
     } catch(error) {
         console.log(error);
     }
-}       
+}
+
+export const sendEmailWithTextBody = async (to: string, subject: string, body: string) => {
+    try {
+        await transporter.sendMail({
+            from: process.env.SENDER_EMAIL,
+            to,
+            subject,
+            text: body
+        })
+    } catch(error) {
+        console.log(error)
+    }
+}
