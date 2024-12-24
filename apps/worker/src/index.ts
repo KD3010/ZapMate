@@ -8,6 +8,12 @@ const validateEmail = (email: string) => {
     return regex.test(email);
 };
 
+function replaceKeys(template: string, replacements: Record<string, string>): string {
+    return template.replace(/{(.*?)}/g, (_, key) => {
+        return replacements[key] || `{${key}}`; // Keep the placeholder if no replacement found
+    });
+}
+
 async function main() {
     // Creating consumer and subscribing to the zap-events topic created by transaction processor service
     const consumer = kafka.consumer({ groupId: "worker" });
@@ -66,8 +72,10 @@ async function main() {
                     const searchKey = JSON.stringify(zapRunDetails?.metadata);
                     emailReceiver = searchKey.slice(searchKey.indexOf("email")+8, searchKey.indexOf(".com")+4);
                 }
+
                 // @ts-ignore
-                sendEmailWithTextBody(emailReceiver, subject, body)
+                let emailBody = replaceKeys(body, zapRunDetails?.metadata);
+                sendEmailWithTextBody(emailReceiver, subject, emailBody)
             }
 
             // Send Solana Logic
