@@ -3,6 +3,11 @@ import client from "@repo/db";
 const TOPIC_NAME = "zap-events";
 import { sendEmailWithTextBody } from "@repo/email";
 
+const validateEmail = (email: string) => {
+    const regex = /^\S+@\S+\.\S+$/
+    return regex.test(email);
+};
+
 async function main() {
     // Creating consumer and subscribing to the zap-events topic created by transaction processor service
     const consumer = kafka.consumer({ groupId: "worker" });
@@ -51,9 +56,18 @@ async function main() {
             // Send Email Logic
             if(currentAction?.action?.type === "Email") {
                 console.log("Sending Email")
-                console.log(currentAction?.metadata, zapRunDetails?.metadata)
                 // @ts-ignore
-                sendEmailWithTextBody(zapRunDetails?.metadata?.email, currentAction?.metadata?.subject, currentAction?.metadata?.body)
+                const { to, subject, body } = currentAction?.metadata;
+                let emailReceiver;
+
+                if(validateEmail(to)) {
+                    emailReceiver = to;
+                } else {
+                    const searchKey = JSON.stringify(zapRunDetails?.metadata);
+                    emailReceiver = searchKey.slice(searchKey.indexOf("email")+8, searchKey.indexOf(".com")+4);
+                }
+                // @ts-ignore
+                sendEmailWithTextBody(emailReceiver, subject, body)
             }
 
             // Send Solana Logic
