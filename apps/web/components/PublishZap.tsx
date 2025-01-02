@@ -93,14 +93,12 @@ const PublishZap = ({zapId}: {
                 triggerMetaData: {}
             })
         } else if(modalVisibilityFor > 1) {
-            setSelectedActions && setSelectedActions(a => a.map((action, i) => {
-                if(i+2 === modalVisibilityFor) {
-                    action.actionType = selectedItem?.type,
-                    action.availableActionId = selectedItem?.id,
-                    action.actionMetaData = selectedItem?.metadata;
-                }
-                return action;
-            }))
+            setSelectedActions && setSelectedActions(a => a.map((action, i) => (i+2 === modalVisibilityFor ? {
+                    actionType: selectedItem?.type,
+                    availableActionId: selectedItem?.id,
+                    actionMetaData: selectedItem?.metadata
+                } : action)
+            ))
         } 
 
         setModalVisibilityFor(0);
@@ -137,7 +135,7 @@ const PublishZap = ({zapId}: {
         {selectedActions?.map((action, index) => <div key={index}><ZapCell index={index+2} name={action.actionType ? action.actionType : "Action"} onClick={() => handleCellClick(index+2)} handleDelete={handleActionDelete} /></div>)}
     </div>
     <div className='mt-8 flex justify-center'>
-        <button onClick={() => setSelectedActions([...selectedActions, emptyAction])} className='bg-secondary-500 shadow-md hover:bg-secondary-700 hover:shadow-lg transition-all p-2 rounded-full'>
+        <button onClick={() => setSelectedActions(a => [...a, emptyAction])} className='bg-secondary-500 shadow-md hover:bg-secondary-700 hover:shadow-lg transition-all p-2 rounded-full'>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="size-6">
                 <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
             </svg>
