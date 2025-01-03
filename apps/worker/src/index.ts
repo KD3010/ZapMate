@@ -1,7 +1,11 @@
 import kafka from "@repo/kafka";
 import client from "@repo/db";
 const TOPIC_NAME = "zap-events";
+import dotenv from "dotenv";
 import { sendEmailWithTextBody } from "@repo/email";
+dotenv.config()
+
+console.log(process.env.SOL_PRIVATE_KEY)
 
 const validateEmail = (email: string) => {
     const regex = /^\S+@\S+\.\S+$/
@@ -75,12 +79,15 @@ async function main() {
 
                 // @ts-ignore
                 let emailBody = replaceKeys(body, zapRunDetails?.metadata);
-                sendEmailWithTextBody(emailReceiver, subject, emailBody)
+                sendEmailWithTextBody(emailReceiver, subject, emailBody);
             }
 
             // Send Solana Logic
             if(currentAction?.action?.type === "Solana") {
-                console.log("Sending Solana")
+                // @ts-ignore
+                const { address, amount } = currentAction?.metadata;
+                // @ts-ignore
+                console.log(replaceKeys(address, zapRunDetails?.metadata), replaceKeys(amount, zapRunDetails?.metadata))
             }
 
             if(stage !== lastStage) {
