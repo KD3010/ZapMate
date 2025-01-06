@@ -5,8 +5,6 @@ import dotenv from "dotenv";
 import { sendEmailWithTextBody } from "@repo/email";
 dotenv.config()
 
-console.log(process.env.SOL_PRIVATE_KEY)
-
 const validateEmail = (email: string) => {
     const regex = /^\S+@\S+\.\S+$/
     return regex.test(email);
@@ -87,7 +85,7 @@ async function main() {
                 // @ts-ignore
                 const { address, amount } = currentAction?.metadata;
                 // @ts-ignore
-                console.log(replaceKeys(address, zapRunDetails?.metadata), replaceKeys(amount, zapRunDetails?.metadata))
+                console.log(`Send sol to ${replaceKeys(address, zapRunDetails?.metadata)} of amount :  ${replaceKeys(amount, zapRunDetails?.metadata)}`)
             }
 
             if(stage !== lastStage) {
