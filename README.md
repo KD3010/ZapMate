@@ -1,6 +1,6 @@
 # ZapMate - A Zapier Clone
 
-https://github.com/user-attachments/assets/236829e2-d6c6-4c6e-b83d-71b20aab4392
+https://github.com/user-attachments/assets/c3b72029-5857-416c-83d0-74b067dd427f
 
 ZapMate is a robust clone of Zapier, designed to automate workflows and integrate multiple services seamlessly. This project demonstrates a microservices architecture with cutting-edge technologies for high performance, scalability, and efficient load management.
 
